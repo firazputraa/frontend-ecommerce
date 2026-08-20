@@ -26,7 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="group">
-      <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+      <div className="relative aspect-4/5 overflow-hidden bg-neutral-100">
         {primaryImage && !imageError ? (
           <img
             src={primaryImage.url}
