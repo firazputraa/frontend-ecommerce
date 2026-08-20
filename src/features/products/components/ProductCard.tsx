@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Product } from '../types/product'
 import { formatCurrency } from '../utils/formatCurrency'
+import { Link } from 'react-router'
 
 interface ProductCardProps {
   product: Product
@@ -26,6 +27,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="group">
+        <Link
+        to={`/product/${product.slug}`}
+        className="block"
+        >
       <div className="relative aspect-4/5 overflow-hidden bg-neutral-100">
         {primaryImage && !imageError ? (
           <img
@@ -71,6 +76,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           ))}
         </div>
       </div>
+     </Link>
     </article>
   )
 }
