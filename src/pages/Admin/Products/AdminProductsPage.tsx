@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import AdminProductTable from '../../../features/products/components/AdminProductTable'
 import { getProducts } from '../../../features/products/services/product.service'
 import type { Product } from '../../../features/products/types/product'
