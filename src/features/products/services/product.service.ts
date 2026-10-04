@@ -1,93 +1,93 @@
-import { mockProducts } from '../data/products.mock'
-import type { ProductQuery } from '../types/catalog'
-import type { Product } from '../types/product'
+import productsData from "../data/products.json";
+import type { ProductQuery, ProductSort } from "../types/catalog";
+import type { Product } from "../types/product";
 
-export async function getProducts(
-  query: ProductQuery = {},
-): Promise<Product[]> {
-  let products = [...mockProducts]
+const products = productsData as Product[];
 
-  if (query.search) {
-    const search = query.search.toLowerCase().trim()
+function matchesSearch(product: Product, search: string): boolean {
+  const query = search.toLowerCase().trim();
 
-    products = products.filter((product) => {
-      return (
-        product.name.toLowerCase().includes(search) ||
-        product.description.toLowerCase().includes(search) ||
-        product.category.name.toLowerCase().includes(search) ||
-        product.brand.name.toLowerCase().includes(search)
-      )
-    })
+  if (!query) {
+    return true;
   }
 
-  if (query.category) {
-    products = products.filter(
-      (product) => product.category.slug === query.category,
-    )
+  return [product.name, product.description, product.category.name, product.brand.name, ...product.variants.map((variant) => variant.sku)].some((value) => value.toLowerCase().includes(query));
+}
+
+function matchesVariantFilters(product: Product, query: ProductQuery): boolean {
+  if (query.size && !product.variants.some((variant) => variant.size === query.size)) {
+    return false;
   }
 
-  if (query.brand) {
-    products = products.filter(
-      (product) => product.brand.slug === query.brand,
-    )
+  if (query.color && !product.variants.some((variant) => variant.color.name.toLowerCase() === query.color!.toLowerCase())) {
+    return false;
   }
 
-  if (query.size) {
-    products = products.filter((product) =>
-      product.variants.some(
-        (variant) =>
-          variant.size.toLowerCase() === query.size?.toLowerCase() &&
-          variant.stock > 0,
-      ),
-    )
+  return true;
+}
+
+function matchesPrice(product: Product, query: ProductQuery): boolean {
+  if (query.minPrice !== undefined && product.basePrice < query.minPrice) {
+    return false;
   }
 
-  if (query.color) {
-    products = products.filter((product) =>
-      product.variants.some(
-        (variant) =>
-          variant.color.toLowerCase() === query.color?.toLowerCase() &&
-          variant.stock > 0,
-      ),
-    )
+  if (query.maxPrice !== undefined && product.basePrice > query.maxPrice) {
+    return false;
   }
 
-  if (query.minPrice !== undefined) {
-    products = products.filter(
-      (product) => product.basePrice >= query.minPrice!,
-    )
-  }
+  return true;
+}
 
-  if (query.maxPrice !== undefined) {
-    products = products.filter(
-      (product) => product.basePrice <= query.maxPrice!,
-    )
-  }
+function sortProducts(productList: Product[], sort: ProductSort = "newest"): Product[] {
+  const sorted = [...productList];
 
-  switch (query.sort) {
-    case 'price-asc':
-      products.sort((a, b) => a.basePrice - b.basePrice)
-      break
+  switch (sort) {
+    case "price-asc":
+      return sorted.sort((a, b) => a.basePrice - b.basePrice);
 
-    case 'price-desc':
-      products.sort((a, b) => b.basePrice - a.basePrice)
-      break
+    case "price-desc":
+      return sorted.sort((a, b) => b.basePrice - a.basePrice);
 
-    case 'name-asc':
-      products.sort((a, b) => a.name.localeCompare(b.name))
-      break
+    case "name-asc":
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
 
-    case 'newest':
+    case "newest":
     default:
-      products.sort((a, b) => b.id - a.id)
-      break
+      return sorted;
   }
-
-  return products
 }
 
-export async function getProductBySlug(
-  slug: string,
-): Promise<Product | undefined> {
-  return mockProducts.find((product) => product.slug === slug)
+export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
+  let result = products.filter((product) => {
+    if (query.category && product.category.slug !== query.category) {
+      return false;
+    }
+
+    if (query.brand && product.brand.slug !== query.brand) {
+      return false;
+    }
+
+    if (!matchesSearch(product, query.search ?? "")) {
+      return false;
+    }
+
+    if (!matchesVariantFilters(product, query)) {
+      return false;
+    }
+
+    if (!matchesPrice(product, query)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  result = sortProducts(result, query.sort);
+
+  return result;
 }
+
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  return products.find((product) => product.slug === slug);
+}
+

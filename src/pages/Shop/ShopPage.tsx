@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router-dom'
 import CatalogFilters from '../../features/products/components/CatalogFilters'
 import ProductGrid from '../../features/products/components/ProductGrid'
 import { getProducts } from '../../features/products/services/product.service'

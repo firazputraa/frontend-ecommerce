@@ -1,26 +1,23 @@
-import { BrowserRouter, Route, Routes } from 'react-router'
-import HomePage from '../pages/Home/HomePage'
-import ShopPage from '../pages/Shop/ShopPage'
-import ProductDetailPage from '../pages/ProductDetail/ProductDetailPage'
-import AdminProductsPage from '../pages/Admin/Products/AdminProductsPage'
+import { Navigate, Route, Routes } from "react-router-dom";
 
-export default function AppRouter() {
+import HomePage from "../pages/Home/HomePage";
+import ShopPage from "../pages/Shop/ShopPage";
+import ProductDetailPage from "../pages/ProductDetail/ProductDetailPage";
+import AdminProductsPage from "../pages/Admin/Products/AdminProductsPage";
+
+export default function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
+    <Routes>
+      <Route path="/" element={<HomePage />} />
 
-        <Route
-          path="/product/:slug"
-          element={<ProductDetailPage />}
-          
-        />
-        <Route
-          path="/admin/products"
-          element={<AdminProductsPage />}
-        />
-      </Routes>
-    </BrowserRouter>
-  )
+      <Route path="/shop" element={<ShopPage />} />
+
+      <Route path="/product/:slug" element={<ProductDetailPage />} />
+
+      <Route path="/admin/products" element={<AdminProductsPage />} />
+
+      <Route path="*" element={<Navigate to="/shop" replace />} />
+    </Routes>
+  );
 }
+
